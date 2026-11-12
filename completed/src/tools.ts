@@ -1,5 +1,5 @@
 import { products, searchProducts, getProductDetails } from './products';
-import { addToCart, removeFromCart, summarizeCart, type CartLine } from './cart';
+import { summarizeCart, type CartLine } from './cart';
 export type ToolContext={getCart:()=>CartLine[]; add:(id:unknown,q?:unknown)=>CartLine[]; remove:(id:unknown)=>CartLine[]};
 export const toolSpecs=[
  {name:'get_products',title:'Get products',description:'Returns all products available in the SimpliShop catalog.',inputSchema:{type:'object',properties:{},additionalProperties:false},annotations:{readOnlyHint:true}},

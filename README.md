@@ -55,6 +55,8 @@ cp .env.example .env
 
 Edit `agent/.env` and replace `put_your_project_api_key_here` with your key. The `.env` file is git-ignored. The default model is `gpt-6-astra`; change `OPENAI_MODEL` there if you want another model available to your API project. The agent sends chat messages and SimpliShop tool results to the OpenAI API. ChatGPT and API billing are managed separately; eligible ChatGPT subscriptions may have an API credit benefit that must be activated. [OpenAI API key setup](https://developers.openai.com/api/docs/guides/api-keys) · [ChatGPT/API billing details](https://help.openai.com/en/articles/20001626-api-credits-benefit-for-eligible-chatgpt-subscriptions)
 
+To point the local agent at the deployed store, set `SIMPLISHOP_URL` in `agent/.env` to its public origin, for example `SIMPLISHOP_URL=https://your-store.example`. The Python app loads this file from its own folder, so the setting works whether you start it from the repository root or from `agent/`.
+
 ### 4. Install and run the Gradio agent
 
 In terminal 2:

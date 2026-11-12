@@ -6,6 +6,7 @@ import json
 import os
 import threading
 from contextlib import contextmanager
+from pathlib import Path
 from typing import Any
 
 from dotenv import load_dotenv
@@ -14,7 +15,7 @@ from openai import OpenAI, OpenAIError
 from playwright.sync_api import Error as PlaywrightError
 from playwright.sync_api import sync_playwright
 
-load_dotenv()
+load_dotenv(Path(__file__).with_name(".env"))
 
 OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-6-astra")
 CDP_URL = os.getenv("CHROME_CDP_URL", "http://127.0.0.1:9222")
