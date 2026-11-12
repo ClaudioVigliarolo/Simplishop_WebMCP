@@ -1,0 +1,5 @@
+import { getProductDetails, type Product } from './products';
+export type CartLine={product:Product;quantity:number}; export type Cart={items:CartLine[];total:number;itemCount:number};
+export const addToCart=(items:CartLine[], productId:unknown, quantity:unknown=1):CartLine[]=>{const p=getProductDetails(productId); if(!Number.isInteger(quantity)||Number(quantity)<1||Number(quantity)>99)throw new Error('quantity must be a positive integer from 1 to 99'); const found=items.find(x=>x.product.id===p.id); const next=found?items.map(x=>x.product.id===p.id?{...x,quantity:x.quantity+Number(quantity)}:x):[...items,{product:p,quantity:Number(quantity)}]; if(next.some(x=>x.quantity>99))throw new Error('Cart quantity cannot exceed 99'); return next;};
+export const removeFromCart=(items:CartLine[],productId:unknown):CartLine[]=>{getProductDetails(productId);return items.filter(x=>x.product.id!==productId);};
+export const summarizeCart=(items:CartLine[]):Cart=>({items,total:items.reduce((s,x)=>s+x.product.price*x.quantity,0),itemCount:items.reduce((s,x)=>s+x.quantity,0)});
