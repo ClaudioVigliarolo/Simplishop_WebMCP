@@ -11,7 +11,7 @@ The six schemas and shared handler mapping live in `completed/src/tools.ts`; reg
 | `get_cart` | none | `{items,total,itemCount}` |
 | `remove_from_cart` | `productId: string` | `{success,cart}`; invalid ID returns error |
 
-Input validation is split into focused functions in `tools.ts`: `validateGetProductsInput`, `validateSearchProductsInput`, `validateGetProductDetailsInput`, `validateAddToCartInput`, `validateGetCartInput`, and `validateRemoveFromCartInput`. `validateInputForTool` is only a small router: it picks the matching validator when WebMCP or the workbench supplies a tool name. Unknown fields are rejected by each validator. Schemas also describe object properties and required fields to the browser/agent. Errors throw from the callback, letting the browser reject the execution. The workbench catches errors and renders their message for direct testing.
+Input validation is split into focused functions in `tools.ts`: `validateGetProductsInput`, `validateSearchProductsInput`, `validateGetProductDetailsInput`, `validateAddToCartInput`, `validateGetCartInput`, and `validateRemoveFromCartInput`. `validateInputForTool` is only a small router: it picks the matching validator when the WebMCP adapter supplies a tool name. Unknown fields are rejected by each validator. Schemas also describe object properties and required fields to the browser/agent. Errors throw from the callback, letting the browser reject the execution. The automated tests assert that invalid inputs throw useful errors.
 
 For example, cart input rules are kept together in one named function:
 
@@ -46,4 +46,4 @@ await modelContext.registerTool({
 }, { signal: controller.signal });
 ```
 
-Demonstrate underlying behavior at `/dev-tools` on the Vite development server in any modern browser. The panel is intentionally excluded from production builds. It proves app logic, not agent discovery. Actual WebMCP testing requires a supporting browser and a compatible agent/inspector. No agent workflow was available to verify in this build environment.
+Test the underlying handlers with `npm test`, then use a compatible WebMCP inspector or agent to verify browser discovery and execution. Unit tests verify app logic, not agent discovery.

@@ -22,7 +22,7 @@ WebMCP lets a website describe specific JavaScript actions as structured tools t
 - `completed/src/webmcp.ts`: browser detection and API integration.
 - `completed/src/tools.ts`: schemas, validation and handlers.
 - `completed/src/cart.ts`: shared cart logic.
-- `completed/src/main.tsx`: visible state and developer workbench.
+- `completed/src/main.tsx`: visible state, cart synchronization, and WebMCP status indicator.
 - `completed/src/products.ts`: sample catalog/search.
 - `agent/app.py`: optional Gradio + OpenAI API agent that calls the live page's WebMCP tools over Playwright CDP.
 
@@ -41,11 +41,11 @@ await document.modelContext.registerTool({
 
 **Does WebMCP replace clicking?** No. It offers a direct structured path when a supporting agent/browser chooses to use it; normal UI still works.
 
-**Does the developer panel prove an agent can use the tools?** No. It exercises the shared local functions only.
+**Do unit tests prove an agent can use the tools?** No. They verify app logic and registration behavior; use a compatible inspector or agent to verify a real tool call.
 
 **Is there a chat agent demo?** Yes. Run the optional Python Gradio app with an OpenAI API key and a dedicated WebMCP-enabled Chrome profile. It drives the page tools; it is separate from Chrome's own agent UI. ChatGPT and OpenAI API access/billing are managed separately.
 
-**What if the API is missing?** The store works normally; only browser tool registration is skipped. Use `/dev-tools` for function demos.
+**What if the API is missing?** The store works normally; only browser tool registration is skipped. Use `npm test` to verify the app logic, or connect a compatible inspector/agent to invoke browser tools.
 
 **Can the agent buy something?** No. The example exposes cart changes but has no checkout/payment tool.
 

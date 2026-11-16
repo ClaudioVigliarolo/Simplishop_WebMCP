@@ -6,8 +6,8 @@
 - `completed/src/cart.ts`: pure cart operations and summary.
 - `completed/src/tools.ts`: tool schemas, shared handlers and strict input validation.
 - `completed/src/webmcp.ts`: capability detection and browser registration lifecycle.
-- `completed/src/main.tsx`: React storefront and developer workbench.
-- `starter/`: independently runnable React store without the WebMCP adapter or workbench.
+- `completed/src/main.tsx`: React storefront, cart state, WebMCP lifecycle, and compatibility indicator.
+- `starter/`: independently runnable React store without the WebMCP adapter.
 - `agent/app.py`: Gradio chat loop, OpenAI Responses API function calls, and Playwright bridge to the Chrome page's WebMCP tools.
 - `course-docs/`: teaching and recording notes.
 
@@ -17,7 +17,7 @@
 flowchart LR
   UI[React storefront] --> Catalog[products.ts]
   UI --> Cart[cart.ts pure functions]
-  Workbench[/dev-tools] --> Validate[tools.ts validation]
+  Tests[Vitest core tests] --> Validate[tools.ts validation]
   Agent[Compatible browser agent] --> Browser[document.modelContext]
   Browser --> Adapter[webmcp.ts]
   Adapter --> Validate

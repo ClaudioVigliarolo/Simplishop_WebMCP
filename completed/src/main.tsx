@@ -7,12 +7,6 @@ import {
   summarizeCart,
   type CartLine,
 } from "./cart";
-import {
-  createToolHandlers,
-  toolSpecs,
-  validateInputForTool,
-  type ToolName,
-} from "./tools";
 import { registerWebMCP } from "./webmcp";
 import "./style.css";
 function App() {
@@ -27,8 +21,8 @@ function App() {
   const [maxPrice, setMaxPrice] = useState(1600);
   const [detail, setDetail] = useState<Product | null>(null);
   const [cartOpen, setCartOpen] = useState(false);
-  const path = location.pathname;
-  const dev = import.meta.env.DEV && path.replace(/\/+$/, "") === "/dev-tools";
+  const path = location.pathname.replace(/\/+$/, "") || "/";
+  const isStoreRoute = path === "/";
   const actions = useMemo(
     () => ({
       getCart: () => cartRef.current,
@@ -48,6 +42,7 @@ function App() {
     [],
   );
   useEffect(() => {
+    if (!isStoreRoute) return;
     let active = true;
     let cleanup = () => {};
     registerWebMCP(actions)
@@ -65,7 +60,7 @@ function App() {
       active = false;
       cleanup();
     };
-  }, [actions]);
+  }, [actions, isStoreRoute]);
   const filtered = searchProducts({ query, category, maxPrice });
   const total = summarizeCart(cart);
   const add = (id: string, q = 1) => {
@@ -76,9 +71,9 @@ function App() {
     }
   };
 
-  if (!import.meta.env.DEV && path.replace(/\/+$/, "") === "/dev-tools") {
+  if (!isStoreRoute) {
     return (
-      <main className="dev-page">
+      <main className="not-found">
         <h1>Page not found</h1>
         <a href="/">Return to SimpliShop</a>
       </main>
@@ -93,23 +88,14 @@ function App() {
           <i>✳</i>
         </a>
         <nav>
-          <a className={!dev ? "active" : ""} href="/">
+          <a className="active" href="/">
             Shop
           </a>
-          {import.meta.env.DEV && (
-            <a className={dev ? "active" : ""} href="/dev-tools">
-              Developer tools
-            </a>
-          )}
         </nav>
         <button className="cart-button" onClick={() => setCartOpen(true)}>
           Bag <span>{total.itemCount}</span>
         </button>
       </header>
-      {dev ? (
-        <DeveloperPanel actions={actions} supported={supported} />
-      ) : (
-        <>
           <main>
             <section className="hero">
               <div>
@@ -266,8 +252,6 @@ function App() {
               <small>{supported ? "API detected" : "Demo mode"}</small>
             </div>
           </footer>
-        </>
-      )}
       {detail && (
         <div className="overlay" onClick={() => setDetail(null)}>
           <section
@@ -356,132 +340,4 @@ function App() {
     </>
   );
 }
-function DeveloperPanel({
-  actions,
-  supported,
-}: {
-  actions: {
-    getCart: () => CartLine[];
-    add: (id: unknown, q?: unknown) => CartLine[];
-    remove: (id: unknown) => CartLine[];
-  };
-  supported: boolean;
-}) {
-  const [tool, setTool] = useState<ToolName>("get_products");
-  const [input, setInput] = useState("{}");
-  const [result, setResult] = useState<unknown>(null);
-  const [error, setError] = useState("");
-  const handlers = createToolHandlers(actions);
-  const spec = toolSpecs.find((x) => x.name === tool)!;
-  const parameterNames = Object.keys(spec.inputSchema.properties ?? {});
-  function run() {
-    setError("");
-    setResult(null);
-    try {
-      const args = validateInputForTool(tool, JSON.parse(input));
-      setResult(
-        (handlers[tool] as (args: Record<string, unknown>) => unknown)(args),
-      );
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Could not run tool");
-    }
-  }
-  return (
-    <main className="dev-page">
-      <div className="eyebrow">SIMPLISHOP LAB · DEVELOPER ONLY</div>
-      <h1>
-        Tool <em>workbench.</em>
-      </h1>
-      <p className="dev-intro">
-        Exercise the same validated application functions used by WebMCP. This
-        panel does not simulate an AI agent.
-      </p>
-      <div className="dev-status">
-        <span className={supported ? "live" : ""}></span>
-        <div>
-          <b>{supported ? "WebMCP API detected" : "WebMCP API unavailable"}</b>
-          <small>
-            {supported
-              ? "Tools register on this page. Agent connectivity has not been verified."
-              : "Underlying functions remain testable here."}
-          </small>
-        </div>
-      </div>
-      <div className="workbench">
-        <aside className="tool-list">
-          <div className="eyebrow">AVAILABLE TOOLS</div>
-          {toolSpecs.map((t) => (
-            <button
-              className={tool === t.name ? "selected" : ""}
-              key={t.name}
-              onClick={() => {
-                setTool(t.name);
-                setInput(JSON.stringify(defaultInputs[t.name], null, 2));
-                setResult(null);
-                setError("");
-              }}
-            >
-              <span>⌘</span>
-              {t.name}
-            </button>
-          ))}
-        </aside>
-        <section className="tool-editor">
-          <div className="editor-head">
-            <div>
-              <h2>{spec.name}</h2>
-              <p>{spec.description}</p>
-              <small className="param-list">
-                Parameters:{" "}
-                {parameterNames.length ? parameterNames.join(", ") : "none"}
-              </small>
-            </div>
-            <span className="tag">
-              {[
-                "get_products",
-                "search_products",
-                "get_product_details",
-                "get_cart",
-              ].includes(tool)
-                ? "READ ONLY"
-                : "CART ACTION"}
-            </span>
-          </div>
-          <label className="input-label">INPUT · JSON</label>
-          <textarea
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            spellCheck={false}
-          />
-          <button className="dark-button run" onClick={run}>
-            Execute function <b>▶</b>
-          </button>
-          <div className="result-head">
-            <span className="input-label">RESULT</span>
-            {error && <span className="error-label">ERROR</span>}
-          </div>
-          <pre className={error ? "error-result" : ""}>
-            {error ||
-              (result === null
-                ? "Run the function to see a structured result."
-                : JSON.stringify(result, null, 2))}
-          </pre>
-        </section>
-      </div>
-      <p className="disclaimer">
-        Tool function testing checks app logic. To test browser discovery and
-        agent behavior, use a compatible browser and a WebMCP agent or inspector
-        extension.
-      </p>
-    </main>
-  );
-}
-const defaultInputs: Record<ToolName, Record<string, unknown>> = {
-  get_products: {},
-  search_products: { query: "headphones", maxPrice: 900 },
-  get_product_details: { productId: "nova-air-14" },
-  add_to_cart: { productId: "soundwave-pro", quantity: 2 },
-  get_cart: {},
-  remove_from_cart: { productId: "soundwave-pro" },
-};
 createRoot(document.getElementById("root")!).render(<App />);

@@ -117,16 +117,14 @@ a {
   gap: 9px;
 }
 .hero .eyebrow span,
-.webmcp-pill > span,
-.dev-status > span {
+.webmcp-pill > span {
   display: inline-block;
   width: 7px;
   height: 7px;
   border-radius: 50%;
   background: #92a88b;
 }
-.hero h1,
-.dev-page h1 {
+.hero h1 {
   font-size: clamp(48px, 5.5vw, 75px);
   line-height: 1.04;
   letter-spacing: -4.4px;
@@ -135,7 +133,6 @@ a {
 }
 .hero h1 em,
 .section-head h2 em,
-.dev-page h1 em,
 .drawer-head h2 em {
   font-family: "Playfair Display", serif;
   font-weight: 500;
@@ -684,159 +681,10 @@ footer .brand {
   display: flex;
   justify-content: space-between;
 }
-.dev-page {
+.not-found {
   max-width: 1100px;
-  margin: auto;
-  padding: 70px 40px 90px;
-}
-.dev-page h1 {
-  font-size: 56px;
-  margin: 16px 0;
-}
-.dev-intro {
-  font-size: 13px;
-  color: #7f8179;
-  margin-bottom: 25px;
-}
-.dev-status {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  background: #eef0eb;
-  border: 1px solid #e3e6df;
-  padding: 13px 16px;
-  width: max-content;
-  min-width: 360px;
-}
-.dev-status > span {
-  background: #c99c65;
-}
-.dev-status > span.live {
-  background: #649269;
-}
-.dev-status div {
-  display: grid;
-  gap: 4px;
-  font-size: 11px;
-}
-.dev-status small {
-  color: #888a82;
-  font-size: 10px;
-}
-.workbench {
-  display: grid;
-  grid-template-columns: 235px 1fr;
-  margin-top: 27px;
-  border: 1px solid #e4e5df;
-  background: #fbfbf8;
-  min-height: 480px;
-}
-.tool-list {
-  padding: 22px 13px;
-  border-right: 1px solid #e7e8e2;
-}
-.tool-list > .eyebrow {
-  padding: 4px 10px 14px;
-}
-.tool-list button {
-  width: 100%;
-  text-align: left;
-  padding: 11px 10px;
-  border: 0;
-  background: transparent;
-  border-radius: 3px;
-  font-family: monospace;
-  font-size: 11px;
-  color: #71736b;
-}
-.tool-list button span {
-  font-family: sans-serif;
-  margin-right: 9px;
-  color: #9c9e94;
-}
-.tool-list button.selected {
-  background: #eaede6;
-  color: #30332d;
-}
-.tool-editor {
-  padding: 27px;
-}
-.editor-head {
-  display: flex;
-  justify-content: space-between;
-  gap: 20px;
-}
-.editor-head h2 {
-  font-family: monospace;
-  font-size: 19px;
-  font-weight: 500;
-  margin: 0 0 8px;
-}
-.editor-head p {
-  font-size: 11px;
-  color: #85877f;
-  max-width: 490px;
-  margin: 0 0 20px;
-}
-.tag {
-  font-size: 8px;
-  letter-spacing: 1px;
-  color: #85877f;
-  background: #f0f1ed;
-  height: max-content;
-  padding: 6px 8px;
-}
-.input-label {
-  display: block;
-  color: #8b8d84;
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 1.2px;
-  margin-bottom: 8px;
-}
-.tool-editor textarea {
-  display: block;
-  width: 100%;
-  height: 107px;
-  resize: vertical;
-  border: 1px solid #e2e3dc;
-  background: #f7f7f4;
-  padding: 12px;
-  font: 11px/1.6 monospace;
-  color: #40433b;
-  outline-color: #a4ad99;
-}
-.run {
-  margin: 13px 0 24px;
-  padding: 11px 14px;
-  font-size: 10px;
-}
-.result-head {
-  display: flex;
-  justify-content: space-between;
-}
-.tool-editor pre {
-  white-space: pre-wrap;
-  overflow: auto;
-  max-height: 260px;
-  min-height: 115px;
-  background: #f3f4f0;
-  border: 1px solid #e7e8e2;
-  padding: 13px;
-  font: 10px/1.6 monospace;
-  color: #51544c;
-}
-.tool-editor pre.error-result {
-  color: #a34237;
-}
-.error-label {
-  font-size: 9px;
-  color: #a34237;
-}
-.disclaimer {
-  color: #8a8c84;
-  font-size: 10px;
-  margin-top: 17px;
+  margin: 0 auto;
+  padding: 70px 40px;
 }
 @media (max-width: 900px) {
   .topbar {
@@ -953,37 +801,5 @@ footer .brand {
   }
   .detail-copy h2 {
     font-size: 28px;
-  }
-  .dev-page {
-    padding: 45px 16px;
-  }
-  .dev-page h1 {
-    font-size: 43px;
-  }
-  .dev-status {
-    min-width: 0;
-    width: 100%;
-  }
-  .workbench {
-    grid-template-columns: 1fr;
-  }
-  .tool-list {
-    border-right: 0;
-    border-bottom: 1px solid #e7e8e2;
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-  }
-  .tool-list > .eyebrow {
-    grid-column: 1/-1;
-  }
-  .tool-editor {
-    padding: 19px;
-  }
-  .editor-head {
-    display: block;
-  }
-  .tag {
-    display: inline-block;
-    margin: 0 0 12px;
   }
 }

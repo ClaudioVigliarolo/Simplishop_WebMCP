@@ -10,7 +10,7 @@ npm install
 npm run dev
 ```
 
-While the Vite development server is running, open `/dev-tools` to exercise the shared functions without an AI agent. The developer panel is removed from production builds. For the no-WebMCP student baseline, run the same commands from `starter/`.
+Run `npm test` to exercise the shared catalog, cart, validation, and registration logic without an AI agent. Use a compatible WebMCP inspector to inspect and invoke the browser-registered tools. For the no-WebMCP student baseline, run the same commands from `starter/`.
 
 ## Run the local Gradio AI agent
 
@@ -83,7 +83,7 @@ Optional environment settings: `OPENAI_MODEL`, `CHROME_CDP_URL`, and `SIMPLISHOP
 - “Remove the Soundwave Pro headphones from my bag.”
 - “Show me the Nova Air 14 details.”
 
-After a cart prompt, look at the SimpliShop Chrome tab: its cart count and contents should update. These prompts require OpenAI API access, a Chrome CDP connection, and a WebMCP-enabled completed app. They will not work through the starter app or the `/dev-tools` function tester alone.
+After a cart prompt, look at the SimpliShop Chrome tab: its cart count and contents should update. These prompts require OpenAI API access, a Chrome CDP connection, and a WebMCP-enabled completed app. They will not work through the starter app or unit tests alone.
 
 ### What the agent reads
 

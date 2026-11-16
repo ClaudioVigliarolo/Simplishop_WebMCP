@@ -2,14 +2,14 @@
 
 ## Created
 
-- `completed/`: independent Vite + React + TypeScript app, 16 local products, responsive CSS, catalog filtering, details modal, cart drawer, six WebMCP tools and `/dev-tools` workbench.
+- `completed/`: independent Vite + React + TypeScript app, 16 local products, responsive CSS, catalog filtering, details modal, cart drawer, six WebMCP tools; no developer workbench is included in the storefront.
 - `completed/src/products.ts`: product/category fixtures, search/category/price filters, detail lookup.
 - `completed/src/cart.ts`: validated add/remove and cart summaries.
 - `completed/src/tools.ts`: tool descriptions, JSON Schema objects, shared handlers and runtime validation.
 - `completed/src/webmcp.ts`: `document.modelContext` feature detection, registration and AbortSignal cleanup.
 - `completed/src/core.test.ts`: catalog, filtering, cart, validation, unsupported API, mocked registration cleanup, and state synchronization tests.
-- `completed/src/main.tsx`, `style.css`: storefront, state wiring, workbench and responsive layout.
-- `starter/`: separate React store without the integration or workbench.
+- `completed/src/main.tsx`, `style.css`: storefront, state wiring, WebMCP status, and responsive layout.
+- `starter/`: separate React store without the WebMCP integration.
 - `agent/app.py`: Gradio chat agent using OpenAI Responses API function calling and Playwright CDP to execute the site's actual WebMCP tools in a dedicated Chrome session; `agent/requirements.txt` lists Python dependencies and `agent/.env.example` documents configuration.
 - `course-docs/01` through `08`: overview, architecture, implementation, lessons, recording guide, troubleshooting, summary and instructor cheat sheet.
 
@@ -21,4 +21,4 @@ Official references checked: [WebMCP draft report](https://webmachinelearning.gi
 
 ## Status
 
-Implementation is present. `npm install` was attempted but this environment cannot resolve `registry.npmjs.org` (`ENOTFOUND`), and its offline cache does not contain the dependencies. The normal project scripts therefore report `tsc: command not found`, `vitest: command not found` and `eslint: command not found`. I used the adjacent workspace's existing Vite/React packages read-only to produce a successful Vite production bundle for both apps; this bypassed TypeScript checking and is not equivalent to `npm run build`. Vitest tests, ESLint and browser automation were not run. Starting a local HTTP server was blocked by the environment's `listen EPERM` restriction. The Python agent source was syntax-checked with `py_compile`, but its runtime workflow could not be tested because Python dependencies, an OpenAI API key, and a WebMCP-enabled Chrome session are unavailable. Run the declared scripts and the README agent workflow in a fully provisioned environment before recording. API requests send chat and tool results to OpenAI. A package lock is present for each web app. No actual compatible agent session was available. The starter and completed copies need dependency installation independently.
+Latest verification: `cd completed && npm run build` passes after removing the developer workbench. The completed app's 10 Vitest tests passed in the previous verification before this UI-only removal; they were not rerun for this change. ESLint and browser automation were not run for this change. The optional Python agent still needs a configured OpenAI API key, Chrome with WebMCP enabled, and a compatible tool-calling setup for a live agent demo. API requests send chat and tool results to OpenAI. Each store folder has its own package lock and installs independently.
