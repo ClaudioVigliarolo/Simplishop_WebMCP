@@ -11,7 +11,28 @@ The six schemas and shared handler mapping live in `completed/src/tools.ts`; reg
 | `get_cart` | none | `{items,total,itemCount}` |
 | `remove_from_cart` | `productId: string` | `{success,cart}`; invalid ID returns error |
 
-Unknown fields are rejected by `validateToolInput`; schemas also describe object properties and required fields to the browser/agent. Errors throw from the callback, letting the browser reject the execution. The workbench catches errors and renders their message for direct testing.
+Input validation is split into focused functions in `tools.ts`: `validateGetProductsInput`, `validateSearchProductsInput`, `validateGetProductDetailsInput`, `validateAddToCartInput`, `validateGetCartInput`, and `validateRemoveFromCartInput`. `validateInputForTool` is only a small router: it picks the matching validator when WebMCP or the workbench supplies a tool name. Unknown fields are rejected by each validator. Schemas also describe object properties and required fields to the browser/agent. Errors throw from the callback, letting the browser reject the execution. The workbench catches errors and renders their message for direct testing.
+
+For example, cart input rules are kept together in one named function:
+
+```ts
+export function validateAddToCartInput(input: unknown): ToolInput {
+  const value = asToolInput(input);
+  allowOnly(value, ["productId", "quantity"]);
+  if (typeof value.productId !== "string" || !value.productId.trim()) {
+    throw new Error("productId must be a non-empty string");
+  }
+  if (
+    value.quantity !== undefined &&
+    (!Number.isInteger(value.quantity) ||
+      Number(value.quantity) < 1 ||
+      Number(value.quantity) > 99)
+  ) {
+    throw new Error("quantity must be a positive integer from 1 to 99");
+  }
+  return value;
+}
+```
 
 ```ts
 await modelContext.registerTool({
@@ -21,7 +42,7 @@ await modelContext.registerTool({
     productId: { type: 'string', minLength: 1 },
     quantity: { type: 'integer', minimum: 1, maximum: 99, default: 1 },
   }, required: ['productId'], additionalProperties: false },
-  execute: async input => handler(validateToolInput('add_to_cart', input)),
+  execute: async input => handler(validateInputForTool('add_to_cart', input)),
 }, { signal: controller.signal });
 ```
 

@@ -43,7 +43,7 @@ sequenceDiagram
   participant C as Cart function
   participant R as React state/UI
   A->>W: invoke add_to_cart({productId, quantity})
-  W->>W: validateToolInput
+  W->>W: validateInputForTool
   W->>H: handler(validated input)
   H->>C: addToCart(current cart, id, quantity)
   C-->>H: next cart

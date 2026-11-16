@@ -31,7 +31,7 @@ Core registration shape:
 ```ts
 await document.modelContext.registerTool({
   name, title, description, inputSchema,
-  execute: async input => handler(validateToolInput(name, input)),
+  execute: async input => handler(validateInputForTool(name, input)),
 }, { signal: controller.signal });
 ```
 
