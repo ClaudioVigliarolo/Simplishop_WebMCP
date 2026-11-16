@@ -10,7 +10,7 @@ npm install
 npm run dev
 ```
 
-Open `/dev-tools` to exercise the shared functions without an AI agent. For the no-WebMCP student baseline, run the same commands from `starter/`.
+While the Vite development server is running, open `/dev-tools` to exercise the shared functions without an AI agent. The developer panel is removed from production builds. For the no-WebMCP student baseline, run the same commands from `starter/`.
 
 ## Run the local Gradio AI agent
 

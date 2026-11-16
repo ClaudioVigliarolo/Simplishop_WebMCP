@@ -46,4 +46,4 @@ await modelContext.registerTool({
 }, { signal: controller.signal });
 ```
 
-Demonstrate underlying behavior at `/dev-tools` in any modern browser. That proves app logic, not agent discovery. Actual WebMCP testing requires a supporting browser and a compatible agent/inspector. No agent workflow was available to verify in this build environment.
+Demonstrate underlying behavior at `/dev-tools` on the Vite development server in any modern browser. The panel is intentionally excluded from production builds. It proves app logic, not agent discovery. Actual WebMCP testing requires a supporting browser and a compatible agent/inspector. No agent workflow was available to verify in this build environment.

@@ -28,7 +28,7 @@ function App() {
   const [detail, setDetail] = useState<Product | null>(null);
   const [cartOpen, setCartOpen] = useState(false);
   const path = location.pathname;
-  const dev = path === "/dev-tools";
+  const dev = import.meta.env.DEV && path.replace(/\/+$/, "") === "/dev-tools";
   const actions = useMemo(
     () => ({
       getCart: () => cartRef.current,
@@ -75,6 +75,16 @@ function App() {
       console.error(e);
     }
   };
+
+  if (!import.meta.env.DEV && path.replace(/\/+$/, "") === "/dev-tools") {
+    return (
+      <main className="dev-page">
+        <h1>Page not found</h1>
+        <a href="/">Return to SimpliShop</a>
+      </main>
+    );
+  }
+
   return (
     <>
       <header className="topbar">
@@ -86,9 +96,11 @@ function App() {
           <a className={!dev ? "active" : ""} href="/">
             Shop
           </a>
-          <a className={dev ? "active" : ""} href="/dev-tools">
-            Developer tools
-          </a>
+          {import.meta.env.DEV && (
+            <a className={dev ? "active" : ""} href="/dev-tools">
+              Developer tools
+            </a>
+          )}
         </nav>
         <button className="cart-button" onClick={() => setCartOpen(true)}>
           Bag <span>{total.itemCount}</span>
