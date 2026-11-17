@@ -1,5 +1,5 @@
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { categories, searchProducts, type Product } from "./products";
 import {
@@ -21,11 +21,36 @@ function App() {
 
   const [webMcpAvailable, setWebMcpAvailable] = useState(false);
 
+  const actions = useMemo(
+  () => ({
+    getCart: () => cartRef.current,
+    add: (productId: unknown, quantity?: unknown) => {
+      const nextCart = addToCart(cartRef.current, productId, quantity);
+      cartRef.current = nextCart;
+      setCart(nextCart);
+      return nextCart;
+    },
+    remove: (productId: unknown) => {
+      const nextCart = removeFromCart(cartRef.current, productId);
+      cartRef.current = nextCart;
+      setCart(nextCart);
+      return nextCart;
+    },
+  }),
+  [],
+);
+
+  const cartRef = useRef(cart);
+  useLayoutEffect(() => {
+    cartRef.current = cart;
+  }, [cart]);
+
+
   useEffect(() => {
     let active = true;
     let cleanup = () => {};
 
-    registerWebMCP()
+    registerWebMCP(actions)
       .then((result) => {
         if (active) {
           setWebMcpAvailable(result.supported);
@@ -43,15 +68,23 @@ function App() {
       active = false;
       cleanup();
     };
-  }, []);
+  }, [actions]);
 
   // Simple cart functions
   function add(id: string, quantity = 1) {
-    setCart((prev) => addToCart(prev, id, quantity));
+     try {
+      actions.add(id, quantity);
+    } catch (error) {
+      console.error("Could not add product to cart", error);
+    }
   }
 
   function remove(id: string) {
-    setCart((prev) => removeFromCart(prev, id));
+     try {
+      actions.remove(id);
+    } catch (error) {
+      console.error("Could not remove product from cart", error);
+    }
   }
 
   // Calculate products and cart totals

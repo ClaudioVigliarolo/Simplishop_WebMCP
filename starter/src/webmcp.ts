@@ -1,5 +1,6 @@
 import {
   createToolHandlers,
+  ToolContext,
   toolSpecs,
   validateInputForTool,
 } from "./tools";
@@ -21,13 +22,13 @@ export function getModelContext(): ModelContextLike | undefined {
   }
 }
 
-export async function registerWebMCP(modelContext = getModelContext()) {
+export async function registerWebMCP(context: ToolContext, modelContext = getModelContext()) {
   if (!modelContext) {
     return { supported: false, cleanup: () => {} };
   }
 
   const controller = new AbortController();
-  const handlers = createToolHandlers();
+  const handlers = createToolHandlers(context);
 
   try {
     for (const spec of toolSpecs) {
