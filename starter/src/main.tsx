@@ -1,5 +1,5 @@
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { categories, searchProducts, type Product } from "./products";
 import {
@@ -9,6 +9,15 @@ import {
   type CartLine,
 } from "./cart";
 import "./style.css";
+import { products } from "./products";
+
+type ModelContextLike = {
+  registerTool: (
+    tool: Record<string, unknown>,
+    options?: { signal?: AbortSignal },
+  ) => Promise<void>;
+};
+
 
 function App() {
   const [cart, setCart] = useState<CartLine[]>([]);
@@ -17,6 +26,46 @@ function App() {
   const [maxPrice, setMaxPrice] = useState(1600);
   const [detail, setDetail] = useState<Product | null>(null);
   const [cartOpen, setCartOpen] = useState(false);
+
+  const [webMcpAvailable, setWebMcpAvailable] = useState(false);
+
+useEffect(() => {
+  const modelContext = (
+    document as Document & { modelContext?: ModelContextLike }
+  ).modelContext;
+
+  if (!modelContext) return;
+
+  const controller = new AbortController();
+  let active = true;
+
+  modelContext.registerTool(
+    {
+      name: "get_products",
+      title: "Get products",
+      description: "Returns all products available in the SimpliShop catalog.",
+      inputSchema: {
+        type: "object",
+        properties: {},
+        additionalProperties: false,
+      },
+      annotations: { readOnlyHint: true },
+      execute: async () => ({ products }),
+    },
+    { signal: controller.signal },
+  )
+    .then(() => {
+      if (active) setWebMcpAvailable(true);
+    })
+    .catch((error) => {
+      console.error("Could not register get_products", error);
+    });
+
+  return () => {
+    active = false;
+    controller.abort();
+  };
+}, []);
 
   // Simple cart functions
   function add(id: string, quantity = 1) {
@@ -55,6 +104,10 @@ const filtered = useMemo(() => {
       </header>
 
       <main>
+        <div className={`webmcp-pill ${webMcpAvailable ? "yes" : ""}`}>
+          <span />
+          {webMcpAvailable ? "WebMCP tool registered" : "WebMCP unavailable"}
+        </div>
         <section className="hero">
           <div>
             <div className="eyebrow">
