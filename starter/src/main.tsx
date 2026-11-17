@@ -18,6 +18,54 @@ type ModelContextLike = {
   ) => Promise<void>;
 };
 
+type SearchProductsInput = {
+  query?: string;
+  category?: string;
+  maxPrice?: number;
+};
+
+function validateSearchProductsInput(input: unknown): SearchProductsInput {
+  if (!input || typeof input !== "object" || Array.isArray(input)) {
+    throw new Error("Input must be a JSON object");
+  }
+
+  const args = input as Record<string, unknown>;
+  const allowedKeys = ["query", "category", "maxPrice"];
+  for (const key of Object.keys(args)) {
+    if (!allowedKeys.includes(key)) {
+      throw new Error(`Unexpected parameter: ${key}`);
+    }
+  }
+
+  if (args.query !== undefined && typeof args.query !== "string") {
+    throw new Error("query must be a string");
+  }
+
+  const productCategories = categories.filter((category) => category !== "All");
+  if (
+    args.category !== undefined &&
+    (typeof args.category !== "string" ||
+      !productCategories.includes(args.category))
+  ) {
+    throw new Error("category must be a known product category");
+  }
+
+  if (
+    args.maxPrice !== undefined &&
+    (typeof args.maxPrice !== "number" ||
+      !Number.isFinite(args.maxPrice) ||
+      args.maxPrice < 0)
+  ) {
+    throw new Error("maxPrice must be a non-negative number");
+  }
+
+  return {
+    query: args.query as string | undefined,
+    category: args.category as string | undefined,
+    maxPrice: args.maxPrice as number | undefined,
+  };
+}
+
 
 function App() {
   const [cart, setCart] = useState<CartLine[]>([]);
@@ -53,7 +101,42 @@ useEffect(() => {
       execute: async () => ({ products }),
     },
     { signal: controller.signal },
-  )
+  ),
+   modelContext.registerTool(
+      {
+        name: "search_products",
+        title: "Search products",
+        description:
+          "Find products by optional text query, category, and maximum price.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            query: {
+              type: "string",
+              description:
+                "Words to find in product names, descriptions, or categories.",
+            },
+            category: {
+              type: "string",
+              enum: categories.filter((category) => category !== "All"),
+              description: "The product category to search within.",
+            },
+            maxPrice: {
+              type: "number",
+              minimum: 0,
+              description: "Maximum price in euros.",
+            },
+          },
+          additionalProperties: false,
+        },
+        annotations: { readOnlyHint: true },
+        execute: async (input: unknown) => {
+          const filters = validateSearchProductsInput(input);
+          return { products: searchProducts(filters) };
+        },
+      },
+      { signal: controller.signal },
+    )
     .then(() => {
       if (active) setWebMcpAvailable(true);
     })
