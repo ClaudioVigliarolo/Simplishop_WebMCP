@@ -8,64 +8,8 @@ import {
   summarizeCart,
   type CartLine,
 } from "./cart";
+import { registerWebMCP } from "./webmcp";
 import "./style.css";
-import { products } from "./products";
-
-type ModelContextLike = {
-  registerTool: (
-    tool: Record<string, unknown>,
-    options?: { signal?: AbortSignal },
-  ) => Promise<void>;
-};
-
-type SearchProductsInput = {
-  query?: string;
-  category?: string;
-  maxPrice?: number;
-};
-
-function validateSearchProductsInput(input: unknown): SearchProductsInput {
-  if (!input || typeof input !== "object" || Array.isArray(input)) {
-    throw new Error("Input must be a JSON object");
-  }
-
-  const args = input as Record<string, unknown>;
-  const allowedKeys = ["query", "category", "maxPrice"];
-  for (const key of Object.keys(args)) {
-    if (!allowedKeys.includes(key)) {
-      throw new Error(`Unexpected parameter: ${key}`);
-    }
-  }
-
-  if (args.query !== undefined && typeof args.query !== "string") {
-    throw new Error("query must be a string");
-  }
-
-  const productCategories = categories.filter((category) => category !== "All");
-  if (
-    args.category !== undefined &&
-    (typeof args.category !== "string" ||
-      !productCategories.includes(args.category))
-  ) {
-    throw new Error("category must be a known product category");
-  }
-
-  if (
-    args.maxPrice !== undefined &&
-    (typeof args.maxPrice !== "number" ||
-      !Number.isFinite(args.maxPrice) ||
-      args.maxPrice < 0)
-  ) {
-    throw new Error("maxPrice must be a non-negative number");
-  }
-
-  return {
-    query: args.query as string | undefined,
-    category: args.category as string | undefined,
-    maxPrice: args.maxPrice as number | undefined,
-  };
-}
-
 
 function App() {
   const [cart, setCart] = useState<CartLine[]>([]);
@@ -77,78 +21,29 @@ function App() {
 
   const [webMcpAvailable, setWebMcpAvailable] = useState(false);
 
-useEffect(() => {
-  const modelContext = (
-    document as Document & { modelContext?: ModelContextLike }
-  ).modelContext;
+  useEffect(() => {
+    let active = true;
+    let cleanup = () => {};
 
-  if (!modelContext) return;
+    registerWebMCP()
+      .then((result) => {
+        if (active) {
+          setWebMcpAvailable(result.supported);
+          cleanup = result.cleanup;
+        } else {
+          result.cleanup();
+        }
+      })
+      .catch((error) => {
+        console.error("WebMCP registration failed", error);
+        setWebMcpAvailable(false);
+      });
 
-  const controller = new AbortController();
-  let active = true;
-
-  modelContext.registerTool(
-    {
-      name: "get_products",
-      title: "Get products",
-      description: "Returns all products available in the SimpliShop catalog.",
-      inputSchema: {
-        type: "object",
-        properties: {},
-        additionalProperties: false,
-      },
-      annotations: { readOnlyHint: true },
-      execute: async () => ({ products }),
-    },
-    { signal: controller.signal },
-  ),
-   modelContext.registerTool(
-      {
-        name: "search_products",
-        title: "Search products",
-        description:
-          "Find products by optional text query, category, and maximum price.",
-        inputSchema: {
-          type: "object",
-          properties: {
-            query: {
-              type: "string",
-              description:
-                "Words to find in product names, descriptions, or categories.",
-            },
-            category: {
-              type: "string",
-              enum: categories.filter((category) => category !== "All"),
-              description: "The product category to search within.",
-            },
-            maxPrice: {
-              type: "number",
-              minimum: 0,
-              description: "Maximum price in euros.",
-            },
-          },
-          additionalProperties: false,
-        },
-        annotations: { readOnlyHint: true },
-        execute: async (input: unknown) => {
-          const filters = validateSearchProductsInput(input);
-          return { products: searchProducts(filters) };
-        },
-      },
-      { signal: controller.signal },
-    )
-    .then(() => {
-      if (active) setWebMcpAvailable(true);
-    })
-    .catch((error) => {
-      console.error("Could not register get_products", error);
-    });
-
-  return () => {
-    active = false;
-    controller.abort();
-  };
-}, []);
+    return () => {
+      active = false;
+      cleanup();
+    };
+  }, []);
 
   // Simple cart functions
   function add(id: string, quantity = 1) {
@@ -189,7 +84,7 @@ const filtered = useMemo(() => {
       <main>
         <div className={`webmcp-pill ${webMcpAvailable ? "yes" : ""}`}>
           <span />
-          {webMcpAvailable ? "WebMCP tool registered" : "WebMCP unavailable"}
+          {webMcpAvailable ? "WebMCP tools registered" : "WebMCP unavailable"}
         </div>
         <section className="hero">
           <div>

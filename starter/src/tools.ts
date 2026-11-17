@@ -1,0 +1,152 @@
+import {
+  categories,
+  getProductDetails,
+  products,
+  searchProducts,
+} from "./products";
+
+export const toolSpecs = [
+  {
+    name: "get_products",
+    title: "Get products",
+    description: "Returns all products available in the SimpliShop catalog.",
+    inputSchema: {
+      type: "object",
+      properties: {},
+      additionalProperties: false,
+    },
+    annotations: { readOnlyHint: true },
+  },
+  {
+    name: "search_products",
+    title: "Search products",
+    description:
+      "Find products by optional text query, category, and maximum price.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        query: {
+          type: "string",
+          description:
+            "Words to find in product names, descriptions, or categories.",
+        },
+        category: {
+          type: "string",
+          enum: categories.filter((category) => category !== "All"),
+          description: "The product category to search within.",
+        },
+        maxPrice: {
+          type: "number",
+          minimum: 0,
+          description: "Maximum price in euros.",
+        },
+      },
+      additionalProperties: false,
+    },
+    annotations: { readOnlyHint: true },
+  },
+  {
+    name: "get_product_details",
+    title: "Get product details",
+    description: "Returns information for one product by its catalog ID.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        productId: {
+          type: "string",
+          minLength: 1,
+          description: "The ID of the product to look up.",
+        },
+      },
+      required: ["productId"],
+      additionalProperties: false,
+    },
+    annotations: { readOnlyHint: true },
+  },
+] as const;
+
+export const createToolHandlers = () => ({
+  get_products: () => ({ products }),
+  search_products: (input: Record<string, unknown>) => ({
+    products: searchProducts(input),
+  }),
+  get_product_details: (input: Record<string, unknown>) => ({
+    product: getProductDetails(input.productId),
+  }),
+});
+
+export type ToolName = keyof ReturnType<typeof createToolHandlers>;
+type ToolInput = Record<string, unknown>;
+
+function asToolInput(input: unknown): ToolInput {
+  if (!input || typeof input !== "object" || Array.isArray(input)) {
+    throw new Error("Input must be a JSON object");
+  }
+  return input as ToolInput;
+}
+
+function allowOnly(input: ToolInput, allowedKeys: string[]): void {
+  for (const key of Object.keys(input)) {
+    if (!allowedKeys.includes(key)) {
+      throw new Error(`Unexpected parameter: ${key}`);
+    }
+  }
+}
+
+export function validateGetProductsInput(input: unknown): ToolInput {
+  const value = asToolInput(input);
+  allowOnly(value, []);
+  return value;
+}
+
+export function validateSearchProductsInput(input: unknown): ToolInput {
+  const value = asToolInput(input);
+  allowOnly(value, ["query", "category", "maxPrice"]);
+
+  if (value.query !== undefined && typeof value.query !== "string") {
+    throw new Error("query must be a string");
+  }
+
+  const productCategories = categories.filter((category) => category !== "All");
+  if (
+    value.category !== undefined &&
+    (typeof value.category !== "string" ||
+      !productCategories.includes(value.category))
+  ) {
+    throw new Error("category must be a known product category");
+  }
+
+  if (
+    value.maxPrice !== undefined &&
+    (typeof value.maxPrice !== "number" ||
+      !Number.isFinite(value.maxPrice) ||
+      value.maxPrice < 0)
+  ) {
+    throw new Error("maxPrice must be a non-negative number");
+  }
+
+  return value;
+}
+
+export function validateGetProductDetailsInput(input: unknown): ToolInput {
+  const value = asToolInput(input);
+  allowOnly(value, ["productId"]);
+  if (typeof value.productId !== "string" || !value.productId.trim()) {
+    throw new Error("productId must be a non-empty string");
+  }
+  return value;
+}
+
+const inputValidators: Record<ToolName, (input: unknown) => ToolInput> = {
+  get_products: validateGetProductsInput,
+  search_products: validateSearchProductsInput,
+  get_product_details: validateGetProductDetailsInput,
+};
+
+/** Routes a dynamic WebMCP tool name to that tool's focused input validator. */
+export function validateInputForTool(
+  name: ToolName,
+  input: unknown,
+): ToolInput {
+  return inputValidators[name](input);
+}
